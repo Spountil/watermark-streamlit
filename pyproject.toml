@@ -1,0 +1,23 @@
+[project]
+name = "watermark-streamlit"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Spountil", email = "ramana.alwardi@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv>=0.9.9",
+    "google-cloud-storage>=3.14.1",
+    "pillow>=12.3.0",
+    "pillow-heif>=1.7.0",
+    "streamlit>=1.63.0",
+]
+
+[project.scripts]
+watermark-streamlit = "watermark_streamlit:main"
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"

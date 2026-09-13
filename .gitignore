@@ -1,0 +1,5 @@
+AI_INSTRUCTIONS.md
+.env
+.venv
+uv.lock
+__pycache__

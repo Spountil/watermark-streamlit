@@ -1,0 +1,44 @@
+name: Build and Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ninamu-immobilier
+  REGION: us-west2
+  SERVICE: watermark-app
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    # Required for Workload Identity Federation
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}'
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          source: ./
+          flags: >
+            --service-account=watermark-app-sa@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+            --set-env-vars=PROJECT_ID=${{ env.PROJECT_ID }},BUCKET_NAME=watermark-streamlit-watermark-assets,FILE_NAME=default_watermark.png
+            --memory=2Gi
+            --allow-unauthenticated

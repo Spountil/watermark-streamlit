@@ -28,8 +28,8 @@ flowchart TD
     Loop --> Done[Generate Download Button]
     Done --> Download([User downloads ZIP file])
     
-    classDef action fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#000;
-    classDef process fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#000;
+    classDef action fill:#1b4332,stroke:#40916c,stroke-width:2px,color:#fff;
+    classDef process fill:#5c4d0c,stroke:#cca000,stroke-width:2px,color:#fff;
     
     class Start,Button,Download action;
     class Convert,Scale,Merge,Zip process;
@@ -48,8 +48,8 @@ graph TD
     IAP -->|Internal Traffic| CR[☁️ Cloud Run Container]
     CR -->|Fetch Asset| GCS[(📦 Cloud Storage Bucket)]
     
-    classDef secure fill:#e8f4f8,stroke:#2b7fb3,stroke-width:2px;
-    classDef compute fill:#f9e8e8,stroke:#c23531,stroke-width:2px;
+    classDef secure fill:#002b5e,stroke:#337fb5,stroke-width:2px,color:#fff;
+    classDef compute fill:#5c1a1b,stroke:#e63946,stroke-width:2px,color:#fff;
     
     class IAP,IAM secure;
     class CR compute;

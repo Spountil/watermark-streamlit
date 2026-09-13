@@ -76,83 +76,89 @@ files = st.file_uploader(
 
 if files:
 
-    progress_bar = st.progress(
-        0,
-        text="Préparation du traitement..."
-    )
+    if st.button("Traiter les photos"):
 
-    total_files = len(files)
-    zip_buffer = io.BytesIO()
+        progress_bar = st.progress(
+            0,
+            text="Préparation du traitement..."
+        )
 
-    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
-        for i, file in enumerate(files):
-            if file is None:
-                continue
+        total_files = len(files)
+        zip_buffer = io.BytesIO()
 
-            percent_complete = (i + 1) / total_files
-            progress_bar.progress(
-                percent_complete,
-                text=f"Traitement de {file.name} ({i+1}/{total_files})"
-            )
+        with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+            for i, file in enumerate(files):
+                if file is None:
+                    continue
 
-            img = Image.open(file)
-            img.thumbnail(max_size)
+                percent_complete = (i + 1) / total_files
+                progress_bar.progress(
+                    percent_complete,
+                    text=f"Traitement de {file.name} ({i+1}/{total_files})"
+                )
 
-            img_width, img_height = img.size
-            watermark_width, watermark_height = watermark.size
-            new_watermark_width = int(img_width * resize_value)
-            ratio = new_watermark_width / watermark_width
-            new_watermark_height = int(watermark_height * ratio)
+                img = Image.open(file)
+                img.thumbnail(max_size)
 
-            scaled_watermark = watermark.resize(
-                (new_watermark_width, new_watermark_height),
-                Image.Resampling.LANCZOS
-            )
+                img_width, img_height = img.size
+                watermark_width, watermark_height = watermark.size
+                new_watermark_width = int(img_width * resize_value)
+                ratio = new_watermark_width / watermark_width
+                new_watermark_height = int(watermark_height * ratio)
 
-            paste_x = (img_width - new_watermark_width) // 2
-            paste_y = (img_height - new_watermark_height) // 2
+                scaled_watermark = watermark.resize(
+                    (new_watermark_width, new_watermark_height),
+                    Image.Resampling.LANCZOS
+                )
 
-            r, g, b, a = scaled_watermark.split()
-            a = a.point(lambda p: int(p * opacity_percentage))
-            scaled_watermark.putalpha(a)
+                paste_x = (img_width - new_watermark_width) // 2
+                paste_y = (img_height - new_watermark_height) // 2
 
-            if watermark_color == "Blanc":
-                new_r = r.point(lambda _: 255)
-                new_g = g.point(lambda _: 255)
-                new_b = b.point(lambda _: 255)
-            else:
-                new_r = r.point(lambda _: 0)
-                new_g = g.point(lambda _: 0)
-                new_b = b.point(lambda _: 0)
+                r, g, b, a = scaled_watermark.split()
+                a = a.point(lambda p: int(p * opacity_percentage))
+                scaled_watermark.putalpha(a)
 
-            scaled_watermark = Image.merge("RGBA", (new_r, new_g, new_b, a))
+                if watermark_color == "Blanc":
+                    new_r = r.point(lambda _: 255)
+                    new_g = g.point(lambda _: 255)
+                    new_b = b.point(lambda _: 255)
+                else:
+                    new_r = r.point(lambda _: 0)
+                    new_g = g.point(lambda _: 0)
+                    new_b = b.point(lambda _: 0)
 
-            img.paste(scaled_watermark, (paste_x, paste_y), mask=scaled_watermark)
+                scaled_watermark = Image.merge("RGBA", (new_r, new_g, new_b, a))
 
-            img = img.convert("RGB")
-            temp_img_buffer = io.BytesIO()
-            img.save(temp_img_buffer, format="JPEG")
+                img.paste(scaled_watermark, (paste_x, paste_y), mask=scaled_watermark)
 
-            original_name = file.name
-            name_without_ext = os.path.splitext(original_name)[0]
-            new_filename = f"{name_without_ext}.jpg"
+                img = img.convert("RGB")
+                temp_img_buffer = io.BytesIO()
+                img.save(temp_img_buffer, format="JPEG")
 
-            zip_file.writestr(new_filename, temp_img_buffer.getvalue())
+                original_name = file.name
+                name_without_ext = os.path.splitext(original_name)[0]
+                new_filename = f"{name_without_ext}.jpg"
 
-            del img
-            del scaled_watermark
-            del temp_img_buffer
+                zip_file.writestr(new_filename, temp_img_buffer.getvalue())
 
-            gc.collect()
+                del img
+                del scaled_watermark
+                del temp_img_buffer
 
-    progress_bar.empty()
+                gc.collect()
 
-    st.download_button(
-        label="📥 Télécharger les photos",
-        data=zip_buffer.getvalue(),
-        file_name="photos_watermarked.zip",
-        mime="application/zip"
-    )
+        progress_bar.empty()
+
+        st.session_state["processed_zip"] = zip_buffer.getvalue()
+        st.success("Traitement terminé ! Vous pouvez télécharger les photos")
+
+    if "processed_zip" in st.session_state:
+        st.download_button(
+            label="📥 Télécharger les photos",
+            data=st.session_state["processed_zip"],
+            file_name="photos_watermarked.zip",
+            mime="application/zip"
+        )
 
 
 

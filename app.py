@@ -42,7 +42,7 @@ watermark_bytes = get_watermark(
 )
 watermark = Image.open(io.BytesIO(watermark_bytes)).convert("RGBA")
     
-st.title("Bienvenue Hélène!")
+st.title("Bienvenue!")
 
 resize_value = st.number_input(
     label="Choisir la taille du logo en pourcentage de l'image",
